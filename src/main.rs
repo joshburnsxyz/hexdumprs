@@ -1,104 +1,105 @@
 use seahorse::{App, Context, Flag, FlagType};
 use std::env;
-use std::process::exit;
-use std::io::Read;
 use std::fs::File;
+use std::io::{self, Read};
+use std::process::exit;
 
 const GLOBAL_BUFFER_LEN: usize = 16;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
+
     let app = App::new("hexdumprs")
         .description("Hexdump utility")
         .author("Josh Burns")
         .version("0.0.0")
-        .action(default_action)
         .usage("hexdumprs [-f FILE] [OPTIONS]")
         .flag(
-	    Flag::new("file", FlagType::String)
-		.description("Specify target file")
-		.alias("f"),
-	)
+            Flag::new("file", FlagType::String)
+                .description("Specify target file")
+                .alias("f"),
+        )
         .flag(
-	    Flag::new("ascii", FlagType::Bool)
-		.description("Only print the ascii values")
-		.alias("a"),
-	)
-       .flag(
-	    Flag::new("hex", FlagType::Bool)
-		.description("Only print the hex values")
-		.alias("H"),
-	);
+            Flag::new("ascii", FlagType::Bool)
+                .description("Only print the ASCII values")
+                .alias("a"),
+        )
+        .flag(
+            Flag::new("hex", FlagType::Bool)
+                .description("Only print the hexadecimal values")
+                .alias("H"),
+        )
+        .action(default_action);
 
     app.run(args);
 }
 
-fn get_file(filepath: String) -> File {
-    match File::open(filepath) {
-	Ok(f) => File::from(f),
-	Err(e) => {
-	    eprintln!("ERROR: {}", e);
-	    exit(1);
-	}
-    }
+fn read_file(file_path: &str) -> io::Result<File> {
+    File::open(file_path)
 }
 
-fn get_hex(byte_array: &mut [u8]) -> String {
-    let build_string_vec: Vec<String> = byte_array.chunks(2)
-        .map(|c| {
-	    if c.len() == 2 { format!("{:02x}{:02x}", c[0], c[1]) }
-	    else { format!("{:02x}", c[0]) }
-	}).collect();
-
-    return build_string_vec.join(" ");
+fn print_hex(bytes: &[u8]) -> String {
+    bytes
+        .chunks(2)
+        .map(|chunk| match chunk.len() {
+            2 => format!("{:02x}{:02x}", chunk[0], chunk[1]),
+            _ => format!("{:02x}", chunk[0]),
+        })
+        .collect::<Vec<String>>()
+        .join(" ")
 }
 
-fn get_ascii(byte_array: &mut [u8]) -> String {
-    let build_string_vec: Vec<String> = byte_array.iter().map(|num| {
-	if *num >= 32 && *num <= 126 { (*num as char).to_string() }
-	else { '.'.to_string() }
-    }).collect();
-
-    return build_string_vec.join("");
+fn print_ascii(bytes: &[u8]) -> String {
+    bytes
+        .iter()
+        .map(|&byte| if (32..=126).contains(&byte) { byte as char } else { '.' })
+        .collect()
 }
 
-fn default_action(c: &Context) {
-    // Get target file from args
-    let mut _file = match c.string_flag("file") {
-	Ok(tf) => get_file(tf),
-	Err(_) => { println!("Please supply a filepath with --file"); exit(1) },
+fn default_action(context: &Context) {
+    let file_path = match context.string_flag("file") {
+        Ok(path) => path,
+        Err(_) => {
+            println!("Please supply a filepath with --file");
+            exit(1);
+        }
+    };
+
+    let mut file = match read_file(&file_path) {
+        Ok(file) => file,
+        Err(err) => {
+            eprintln!("ERROR: {}", err);
+            exit(1);
+        }
     };
 
     let mut buffer = [0; GLOBAL_BUFFER_LEN];
-    let mut offset: usize = 0;
+    let mut offset = 0;
 
     loop {
-	let bytes_read = _file.read(&mut buffer);
-	match bytes_read {
-	    Ok(number) => {
-		if number == 0 {
-		    break;
-		} else {
-		    if c.bool_flag("hex") {
-			println!("{:40}", get_hex(&mut buffer[0..number]));
-		    } else if c.bool_flag("ascii") {
-			println!("{:10}", get_ascii(&mut buffer[0..number]));
-		    } else {
-		    println!("{:08x}: {:40} {:10}",
-			     offset,
-			     get_hex(&mut buffer[0..number]),
-			     get_ascii(&mut buffer[0..number]));
-		    }
-		    offset += GLOBAL_BUFFER_LEN;
-		}
-	    },
-	    Err(err) => {
-		eprintln!("ERROR: {}", err);
-		break;
-	    }
-	}
+        match file.read(&mut buffer) {
+            Ok(0) => break,
+            Ok(bytes_read) => {
+                if context.bool_flag("hex") {
+                    println!("{:40}", print_hex(&buffer[..bytes_read]));
+                } else if context.bool_flag("ascii") {
+                    println!("{:10}", print_ascii(&buffer[..bytes_read]));
+                } else {
+                    println!(
+                        "{:08x}: {:40} {:10}",
+                        offset,
+                        print_hex(&buffer[..bytes_read]),
+                        print_ascii(&buffer[..bytes_read])
+                    );
+                }
+                offset += GLOBAL_BUFFER_LEN;
+            }
+            Err(err) => {
+                eprintln!("ERROR: {}", err);
+                break;
+            }
+        }
     }
 
-    // Exit w/o error code
     exit(0);
 }
