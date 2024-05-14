@@ -1,7 +1,7 @@
 use seahorse::{App, Context, Flag, FlagType};
 use std::env;
 use std::process::exit;
-use std::io::Read;
+use std::io::{self, Read, BufRead};
 use std::fs::File;
 
 const GLOBAL_BUFFER_LEN: usize = 16;
@@ -55,7 +55,7 @@ fn default_action(c: &Context) {
     // Get target file from args
     let mut _file = match c.string_flag("file") {
 	Ok(tf) => get_file(tf),
-	Err(_) => { exit(1) },
+	Err(_) => { println!("Please supply a filepath with --file"); exit(1) },
     };
 
     let mut buffer = [0; GLOBAL_BUFFER_LEN];
