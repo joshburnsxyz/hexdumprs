@@ -1,14 +1,30 @@
+// pub fn print_hex(bytes: &[u8], chunksize: usize) -> String {
+//     bytes
+//         .chunks(chunksize)
+//         .map(|chunk| match chunk.len() {
+//             2 => format!("{:02x}{:02x}", chunk[0], chunk[1]),
+//             3 => format!("{:02x}{:02x}{:02x}", chunk[0], chunk[1], chunk[2]),
+//             4 => format!("{:02x}{:02x}{:02x}{:02x}", chunk[0], chunk[1], chunk[2], chunk[3]),
+//             _ => format!("{:02x}", chunk[0]),
+//         })
+//         .collect::<Vec<String>>()
+//         .join(" ")
+// }
+
+
 pub fn print_hex(bytes: &[u8], chunksize: usize) -> String {
     bytes
-        .chunks(chunksize)
-        .map(|chunk| match chunk.len() {
-            2 => format!("{:02x}{:02x}", chunk[0], chunk[1]),
-            3 => format!("{:02x}{:02x}{:02x}", chunk[0], chunk[1], chunk[2]),
-            4 => format!("{:02x}{:02x}{:02x}{:02x}", chunk[0], chunk[1], chunk[2], chunk[3]),
-            _ => format!("{:02x}", chunk[0]),
-        })
-        .collect::<Vec<String>>()
-        .join(" ")
+	.chunks(chunksize)
+	.map(|chunk| {
+	    let format_string = format!("{:02x}", chunk[0]);
+	    let mut formatted_chunk = format_string;
+	    for &byte in chunk.iter().skip(1) {
+		formatted_chunk.push_str(&format!("{:02x}", byte));
+	    }
+	    return formatted_chunk;
+	})
+	.collect::<Vec<_>>()
+	.join(" ")
 }
 
 pub fn print_ascii(bytes: &[u8]) -> String {
