@@ -4,6 +4,8 @@ use std::process::exit;
 use std::io::Read;
 use std::fs::File;
 
+const GLOBAL_BUFFER_LEN: usize = 16;
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     let app = App::new("hexdumprs")
@@ -50,12 +52,35 @@ fn get_ascii(byte_array: &mut [u8]) -> String {
 }
 
 fn default_action(c: &Context) {
-    let _file = match c.string_flag("file") {
-	Ok(tf) => tf,
+    // Get target file from args
+    let mut _file = match c.string_flag("file") {
+	Ok(tf) => get_file(tf),
 	Err(_) => { exit(1) },
     };
 
-    println!("{}", _file);
+    let mut buffer = [0; GLOBAL_BUFFER_LEN];
+    let mut offset: usize = 0;
+
+    loop {
+	let bytes_read = _file.read(&mut buffer);
+	match bytes_read {
+	    Ok(number) => {
+		if number == 0 {
+		    break;
+		} else {
+		    println!("{:08x}: {:40} {:10}",
+			     offset,
+			     get_hex(&mut buffer[0..number]),
+			     get_ascii(&mut buffer[0..number]));
+		    offset += GLOBAL_BUFFER_LEN;
+		}
+	    },
+	    Err(err) => {
+		eprintln!("ERROR: {}", err);
+		break;
+	    }
+	}
+    }
 
     // Exit w/o error code
     exit(0);
