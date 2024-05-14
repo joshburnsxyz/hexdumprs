@@ -1,17 +1,25 @@
 CARGO := $(shell which cargo)
 BIN := hexdumprs
 OUTDIR := dist
-TARGETDIR := target/debug
+TARGETDIR := target
 PREFIX := /usr/share
 
-hexdumprs:
+debug:
 	mkdir -p $(OUTDIR)
 	$(CARGO) build \
 		--verbose
-	mv $(TARGETDIR)/$(BIN) $(OUTDIR)/$(BIN)	
+	mv $(TARGETDIR)/debug/$(BIN) $(OUTDIR)/$(BIN)	
+
+
+release:
+	mkdir -p $(OUTDIR)
+	$(CARGO) build \
+		--verbose \
+		--release
+	mv $(TARGETDIR)/release/$(BIN) $(OUTDIR)/$(BIN)	
 
 clean:
 	@rm -rf $(OUTDIR)
-	@rm -rf target
+	@rm -rf $(TARGETDIR)
 
-.PHONY: clean
+.PHONY: clean release debug
