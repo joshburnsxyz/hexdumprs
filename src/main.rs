@@ -17,6 +17,16 @@ fn main() {
 	    Flag::new("file", FlagType::String)
 		.description("Specify target file")
 		.alias("f"),
+	)
+        .flag(
+	    Flag::new("ascii", FlagType::Bool)
+		.description("Only print the ascii values")
+		.alias("a"),
+	)
+       .flag(
+	    Flag::new("hex", FlagType::Bool)
+		.description("Only print the hex values")
+		.alias("H"),
 	);
 
     app.run(args);
@@ -68,10 +78,16 @@ fn default_action(c: &Context) {
 		if number == 0 {
 		    break;
 		} else {
+		    if c.bool_flag("hex") {
+			println!("{:40}", get_hex(&mut buffer[0..number]));
+		    } else if c.bool_flag("ascii") {
+			println!("{:10}", get_ascii(&mut buffer[0..number]));
+		    } else {
 		    println!("{:08x}: {:40} {:10}",
 			     offset,
 			     get_hex(&mut buffer[0..number]),
 			     get_ascii(&mut buffer[0..number]));
+		    }
 		    offset += GLOBAL_BUFFER_LEN;
 		}
 	    },
