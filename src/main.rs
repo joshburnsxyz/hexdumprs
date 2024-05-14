@@ -29,6 +29,11 @@ fn main() {
                 .description("Only print the hexadecimal values")
                 .alias("H"),
         )
+        .flag(
+	    Flag::new("chunksize", FlagType::Int)
+		.description("Change chunk size for hex conversion")
+		.alias("c"),
+	)
         .action(default_action);
 
     app.run(args);
@@ -38,9 +43,9 @@ fn read_file(file_path: &str) -> io::Result<File> {
     File::open(file_path)
 }
 
-fn print_hex(bytes: &[u8]) -> String {
+fn print_hex(bytes: &[u8], chunksize: usize) -> String {
     bytes
-        .chunks(2)
+        .chunks(chunksize)
         .map(|chunk| match chunk.len() {
             2 => format!("{:02x}{:02x}", chunk[0], chunk[1]),
             _ => format!("{:02x}", chunk[0]),
@@ -65,6 +70,11 @@ fn default_action(context: &Context) {
         }
     };
 
+    let chunksize: usize = match context.uint_flag("chunksize") {
+	Ok(us) => us,
+	Err(_) => 2
+    };
+
     let mut file = match read_file(&file_path) {
         Ok(file) => file,
         Err(err) => {
@@ -81,14 +91,14 @@ fn default_action(context: &Context) {
             Ok(0) => break,
             Ok(bytes_read) => {
                 if context.bool_flag("hex") {
-                    println!("{:40}", print_hex(&buffer[..bytes_read]));
+                    println!("{:40}", print_hex(&buffer[..bytes_read], chunksize));
                 } else if context.bool_flag("ascii") {
                     println!("{:10}", print_ascii(&buffer[..bytes_read]));
                 } else {
                     println!(
                         "{:08x}: {:40} {:10}",
                         offset,
-                        print_hex(&buffer[..bytes_read]),
+                        print_hex(&buffer[..bytes_read], chunksize),
                         print_ascii(&buffer[..bytes_read])
                     );
                 }
