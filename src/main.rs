@@ -1,8 +1,12 @@
+mod conversion;
+mod fileio;
+
 use seahorse::{App, Context, Flag, FlagType};
 use std::env;
-use std::fs::File;
-use std::io::{self, Read};
+use std::io::Read;
 use std::process::exit;
+use conversion::{print_ascii, print_hex};
+use fileio::read_file;
 
 const GLOBAL_BUFFER_LEN: usize = 16;
 
@@ -39,27 +43,7 @@ fn main() {
     app.run(args);
 }
 
-fn read_file(file_path: &str) -> io::Result<File> {
-    File::open(file_path)
-}
 
-fn print_hex(bytes: &[u8], chunksize: usize) -> String {
-    bytes
-        .chunks(chunksize)
-        .map(|chunk| match chunk.len() {
-            2 => format!("{:02x}{:02x}", chunk[0], chunk[1]),
-            _ => format!("{:02x}", chunk[0]),
-        })
-        .collect::<Vec<String>>()
-        .join(" ")
-}
-
-fn print_ascii(bytes: &[u8]) -> String {
-    bytes
-        .iter()
-        .map(|&byte| if (32..=126).contains(&byte) { byte as char } else { '.' })
-        .collect()
-}
 
 fn default_action(context: &Context) {
     let file_path = match context.string_flag("file") {
