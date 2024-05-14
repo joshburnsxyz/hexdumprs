@@ -1,17 +1,3 @@
-// pub fn print_hex(bytes: &[u8], chunksize: usize) -> String {
-//     bytes
-//         .chunks(chunksize)
-//         .map(|chunk| match chunk.len() {
-//             2 => format!("{:02x}{:02x}", chunk[0], chunk[1]),
-//             3 => format!("{:02x}{:02x}{:02x}", chunk[0], chunk[1], chunk[2]),
-//             4 => format!("{:02x}{:02x}{:02x}{:02x}", chunk[0], chunk[1], chunk[2], chunk[3]),
-//             _ => format!("{:02x}", chunk[0]),
-//         })
-//         .collect::<Vec<String>>()
-//         .join(" ")
-// }
-
-
 pub fn print_hex(bytes: &[u8], chunksize: usize) -> String {
     bytes
 	.chunks(chunksize)
