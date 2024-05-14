@@ -1,7 +1,7 @@
 use seahorse::{App, Context, Flag, FlagType};
 use std::env;
 use std::process::exit;
-use std::io::{self, Read, BufRead};
+use std::io::Read;
 use std::fs::File;
 
 const GLOBAL_BUFFER_LEN: usize = 16;
