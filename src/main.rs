@@ -30,7 +30,15 @@ fn get_file(filepath: String) -> File {
     }
 }
 
-// TODO: fn get_hex(byte_array: &mut [u8]) -> String {}
+fn get_hex(byte_array: &mut [u8]) -> String {
+    let build_string_vec: Vec<String> = byte_array.chunks(2)
+        .map(|c| {
+	    if c.len() == 2 { format!("{:02x}{:02x}", c[0], c[1]) }
+	    else { format!("{:02x}", c[0]) }
+	}).collect();
+
+    return build_string_vec.join(" ");
+}
 
 // TODO: fn get_ascii(byte_array: &mut [u8]) -> String {}
 
