@@ -13,6 +13,7 @@ fn main() {
         .author("Josh Burns")
         .version("0.0.0")
         .action(default_action)
+        .usage("hexdumprs [-f FILE] [OPTIONS]")
         .flag(
 	    Flag::new("file", FlagType::String)
 		.description("Specify target file")
