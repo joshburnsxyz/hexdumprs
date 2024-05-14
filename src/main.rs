@@ -1,6 +1,8 @@
 use seahorse::{App, Context, Flag, FlagType};
 use std::env;
 use std::process::exit;
+use std::io::Read;
+use std::fs::File;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -17,6 +19,20 @@ fn main() {
 
     app.run(args);
 }
+
+fn get_file(filepath: String) -> File {
+    match File::open(filepath) {
+	Ok(f) => File::from(f),
+	Err(e) => {
+	    eprintln!("ERROR: {}", e);
+	    exit(1);
+	}
+    }
+}
+
+// TODO: fn get_hex(byte_array: &mut [u8]) -> String {}
+
+// TODO: fn get_ascii(byte_array: &mut [u8]) -> String {}
 
 fn default_action(c: &Context) {
     let _file = match c.string_flag("file") {
