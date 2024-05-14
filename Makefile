@@ -1,7 +1,7 @@
 CARGO := $(shell which cargo)
 BIN := hexdumprs
 OUTDIR := dist
-TARGETDIR := ./target/debug
+TARGETDIR := target/debug
 PREFIX := /usr/share
 
 hexdumprs:
@@ -12,6 +12,6 @@ hexdumprs:
 
 clean:
 	@rm -rf $(OUTDIR)
-	@rm -rf $(TARGETDIR)
+	@rm -rf target
 
 .PHONY: clean
