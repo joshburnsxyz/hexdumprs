@@ -40,7 +40,14 @@ fn get_hex(byte_array: &mut [u8]) -> String {
     return build_string_vec.join(" ");
 }
 
-// TODO: fn get_ascii(byte_array: &mut [u8]) -> String {}
+fn get_ascii(byte_array: &mut [u8]) -> String {
+    let build_string_vec: Vec<String> = byte_array.iter().map(|num| {
+	if *num >= 32 && *num <= 126 { (*num as char).to_string() }
+	else { '.'.to_string() }
+    }).collect();
+
+    return build_string_vec.join("");
+}
 
 fn default_action(c: &Context) {
     let _file = match c.string_flag("file") {
