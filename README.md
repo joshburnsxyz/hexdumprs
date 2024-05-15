@@ -14,5 +14,6 @@ Flags:
         -f, --file <string> : Specify target file
         -a, --ascii         : Only print the ascii values
         -H, --hex           : Only print the hex values
+        -c, --chunksize <int> : Change chunk size for hex conversion
         -h, --help          : Show help
 ```
